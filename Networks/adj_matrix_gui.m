@@ -9,6 +9,7 @@ end
  X=zeros(1);
  S=zeros(1);
  h = gco;    %handle of current object, last number on the screen
+ 
 switch action
     case 'motion'     %case 'motion' called when drawing line between numbers
         line_h = getappdata(gcf,'motionline'); %defining drawn line as line_h
@@ -29,8 +30,8 @@ switch action
                 
                 % First click
                 if ~isappdata(fig, 'motionline') %check if current figure has value'motionline' and if 'motionline' is associated with fig
-                    if isequal(get(h,'Type'),'text') %checks if type of the numbers in the plot is text
-                        pt = get(h,'Position'); %position of last number on the screen
+                    if isequal(get(h,'Type'),'text') %checks if type of the current object in the plot is text
+                        pt = get(h,'Position'); %position of current object on the screen
                         hold on
                         line_h = plot(pt(1), pt(2),'b-.' ... %plotting the points on the screen
                             ,'EraseMode','normal');
@@ -59,25 +60,34 @@ switch action
                         R = 114;
                         L = 108;
                         C = 99;
-                        
+                      
                         switch get(gcf,'CurrentCharacter')
                             
                             case R
                                 X=5;
+                                c=[1,0,0];
+                                l=2;
+                                
                                 
                             case L 
                                 X=8;
+                                c=[0,1,0];
+                                l=1;
                                 
                             case C
                                 X=10;
+                                c=[1,1,0];
+                                l=1.5;
                                 
-                            otherwise X=1;
+                            otherwise X=1; c=[0,0,1]; l=0.5;
+                                        
                         end
+                      
+                        a=findobj(gcf,'Type','line','UserData','');
+                        set(a,'UserData',X,'Color',c,'LineWidth',l)
+                       
                         
-                        a=findobj('Type','line');
-                        
-                        set(a,'UserData',X)
-                                               
+                       
                         Matrix(I,J) = Matrix(I,J)+X; %adding the values in the spots where the connections are made
                         Matrix(J,I) = Matrix(J,I)+X; %adding the values in the spots where the connections are made
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
@@ -151,8 +161,8 @@ switch action
                         end
                         if isappdata(gcf,'Matrix')
                             Matrix = getappdata(gcf,'Matrix');
-                            a=findobj('Type','line');
-                            S=get(a,'UserData');
+                            h=gco;
+                            S=get(h,'UserData');
                             Matrix(I,J) = Matrix(I,J)-S;
                             Matrix(J,I) = Matrix(J,I)-S;
                             setappdata(gcf,'Matrix',Matrix)
