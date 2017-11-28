@@ -55,30 +55,19 @@ switch action
                         Matrix = getappdata(gcf,'Matrix'); %transform matrix of current function
                         
                         ESC = 27;
-                        
-                        RCLvalue = inputdlg('Enter 1 for resistor,2 for capacitor,3 for coil, xxx for nothing',...
-                                'Sample');
-                                RCLvalue2 = str2double(RCLvalue);                                            
-                        
-                        switch RCLvalue2
-                            
-                            case 1
-                                d = inputdlg('Enter value of resistance',...
-                                'Sample');
-                                X = str2double(d);
-                            case 2 
-                                d = inputdlg('Enter value of capacitance',...
-                                'Sample');
-                                X = str2double(d);                                
-                            case 3
-                                d = inputdlg('Enter value of inductance',...
-                                'Sample');
-                                X = str2double(d);                              
-                            otherwise X=1;
+                        set(fig,'WindowButtonMotionFcn', '');
+                        T=0;
+                        while T==0
+                        Comp
                         end
                         
-                        Matrix(I,J) = Matrix(I,J)+X; %adding the values in the spots where the connections are made
-                        Matrix(J,I) = Matrix(J,I)+X; %adding the values in the spots where the connections are made
+%                         if get(Comp.Value) == 1
+%                             resistance = get(app1.ResistanceEditField.Value);
+%                         end
+%                         resistance
+                        
+                        Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made
+                        Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made
 %                         Matrix(J,I) = Matrix(J,I)+X*(-1);
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
                         
@@ -91,7 +80,7 @@ switch action
                     end
                     
                     rmappdata(gcf,'motionline') %removing the motion line
-                    set(fig,'WindowButtonMotionFcn', '');%setting reaction back to move the cursor
+%                     set(fig,'WindowButtonMotionFcn', '');%setting reaction back to move the cursor
                 end
             case 'open' %creating Point (doubleclick)
                 pt = get(gca,'CurrentPoint'); %Position of Cursor for Point
@@ -195,3 +184,6 @@ handles = get(gca,'Children');
 txt_h = findobj(handles,'Type','text');
 
 set(gca,'Children',[txt_h; setdiff(handles,txt_h)])
+end
+end
+
