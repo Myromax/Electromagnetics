@@ -64,18 +64,21 @@ switch action
                         switch get(gcf,'CurrentCharacter')
                             
                             case R
-                                X=5;
+                                d = inputdlg('Enter value of resistance');
+                                X = str2double(d);
                                 c=[1,0,0];
                                 l=2;
                                 
                                 
                             case L 
-                                X=8;
+                                d = inputdlg('Enter value of capacitance');
+                                X = str2double(d); 
                                 c=[0,1,0];
                                 l=1;
                                 
                             case C
-                                X=10;
+                                d = inputdlg('Enter value of inductance');
+                                X = str2double(d);
                                 c=[1,1,0];
                                 l=1.5;
                                 
