@@ -57,9 +57,11 @@ switch action
                         ESC = 27;
                         set(fig,'WindowButtonMotionFcn', '');
                         T=0;
-                        while T==0
-                        Comp
-                        end
+                        ui = Comp2
+                        uiwait;
+                        ui.I
+                        ui.R
+                        delete(ui)
                         
 %                         if get(Comp.Value) == 1
 %                             resistance = get(app1.ResistanceEditField.Value);
