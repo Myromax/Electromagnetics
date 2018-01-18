@@ -53,29 +53,28 @@ switch action
                         I = round(str2double(get(startobj,'String'))); %getting string of start object and transfer to double
                         J = round(str2double(get(endobj,'String'))); %getting string of end object and transfer to double
                         Matrix = getappdata(gcf,'Matrix'); %transform matrix of current function
+                        dMatrix = getappdata(gcf,'dMatrix');
                         
                         ESC = 27;
                         set(fig,'WindowButtonMotionFcn', '');
-                        T=0;
-                        ui = Comp2
-                        uiwait;
-                        ui.I
-                        ui.R
-                        delete(ui)
+                         ui = Comp                  
+                         uiwait;
+                         ui.I
+                         ui.R
+                         ui.C
+                         delete(ui)
                         
-%                         if get(Comp.Value) == 1
-%                             resistance = get(app1.ResistanceEditField.Value);
-%                         end
-%                         resistance
-                        
-                        Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made
-                        Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made
-%                         Matrix(J,I) = Matrix(J,I)+X*(-1);
+                        Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made (start to end)
+                        Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made (end to start)
+                        dMatrix(I,J) = dMatrix(I,J)+1;
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
+                        setappdata(gcf,'dMatrix',dMatrix)
                         
                         Matrix
-                        Ic = adjacency2incidence(Matrix);
-                        icc=full(Ic);
+                        dMatrix
+                         Ic = adjacency2incidence(dMatrix);
+                        
+                         icc=full(Ic)
                         
                     else
                         delete(line_h) % if the end of the line is not on a number delete it
@@ -95,10 +94,18 @@ switch action
                 if ~isappdata(gcf,'Matrix')
                     setappdata(gcf,'Matrix',[])
                 end
+                if ~isappdata(gcf,'dMatrix')
+                    setappdata(gcf,'dMatrix',[])
+                end
                 Matrix = getappdata(gcf,'Matrix');
                 Matrix(n,n) = 0;
                 setappdata(gcf,'Matrix',Matrix)
                 Matrix
+                
+                dMatrix = getappdata(gcf,'dMatrix');
+                dMatrix(n,n) = 0;
+                setappdata(gcf,'dMatrix',dMatrix)
+                dMatrix
             case 'alt' %rechte Maustaste
                 switch get(gco,'Type')
                     case 'text' %deleting Point
@@ -122,12 +129,22 @@ switch action
                             end
                         end
                         if isappdata(gcf,'Matrix')
-                            Matrix = getappdata(gcf,'Matrix');
-                            Matrix(n,:) = [];
-                            Matrix(:,n) = [];
-                            setappdata(gcf,'Matrix',Matrix)
-                            Matrix
+                             Matrix = getappdata(gcf,'Matrix');
+                             Matrix(n,:) = [];
+                             Matrix(:,n) = [];
+                             setappdata(gcf,'Matrix',Matrix)
+                             Matrix
                         end
+                        
+                        if isappdata(gcf,'dMatrix')
+                             dMatrix = getappdata(gcf,'dMatrix');
+                             dMatrix(n,:) = [];
+                             dMatrix(:,n) = [];
+                             setappdata(gcf,'dMatrix',dMatrix)
+                             dMatrix
+                        end
+                        
+                        
                         delete(gco)
                     case 'line' %deleting line
                         xdata = get(gco,'XData'); %getting x coordinates of beginning and end of the line
@@ -149,11 +166,19 @@ switch action
                             setappdata(gcf,'Matrix',Matrix)
                             Matrix
                         end
+                        
+                        if isappdata(gcf,'dMatrix')
+                            dMatrix = getappdata(gcf,'dMatrix');
+                            dMatrix(I,J) = dMatrix(I,J)-S;
+                            setappdata(gcf,'dMatrix',dMatrix)
+                            dMatrix
+                        end
                         delete(gco)
                 end % End object switch
         end % End button switch
     case 'keypress'
         ESC = 27;
+        ENTER = 13;
         
         switch get(gcf,'CurrentCharacter')
             case ESC
@@ -164,6 +189,8 @@ switch action
                     rmappdata(gcf,'motionline')
                 end
                 set(gcf,'WindowButtonMotionFcn', '');
+            case ENTER %later for the command to calculate
+                 set(gcf,'WindowButtonMotionFcn', ''); 
         end
         
     case 'init'             %called when function is started
