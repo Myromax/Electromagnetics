@@ -53,28 +53,29 @@ switch action
                         I = round(str2double(get(startobj,'String'))); %getting string of start object and transfer to double
                         J = round(str2double(get(endobj,'String'))); %getting string of end object and transfer to double
                         Matrix = getappdata(gcf,'Matrix'); %transform matrix of current function
-                        dMatrix = getappdata(gcf,'dMatrix');
                         
                         ESC = 27;
                         set(fig,'WindowButtonMotionFcn', '');
-                         ui = Comp                  
-                         uiwait;
-                         ui.I
-                         ui.R
-                         ui.C
-                         delete(ui)
+%                           ui = Comp                  
+%                           uiwait;
+%                           ui.I;
+%                           valueR=ui.R;
+%                           ui.C;
+%                           delete(ui)
                         
                         Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made (start to end)
                         Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made (end to start)
-                        dMatrix(I,J) = dMatrix(I,J)+1;
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
-                        setappdata(gcf,'dMatrix',dMatrix)
+
                         
-                        Matrix
-                        dMatrix
-                         Ic = adjacency2incidence(dMatrix);
-                        
-                         icc=full(Ic)
+                        Ic = adjacency2incidence(Matrix);
+                        icc=full(Ic)
+                        length(icc)
+                        [m,n] = size(icc)
+%                         Resistance = getappdata(gcf,'Resistance');
+%                         Resistance(m,m) = valueR;
+%                         Resistance
+%                         setappdata(gcf,'Resistance',Resistance)
                         
                     else
                         delete(line_h) % if the end of the line is not on a number delete it
@@ -87,7 +88,7 @@ switch action
                 pt = get(gca,'CurrentPoint'); %Position of Cursor for Point
                 pt = pt(1,:);
                 hold on
-                n = 1+length(findobj(get(gca,'Children'),'Type','text'))
+                n = 1+length(findobj(get(gca,'Children'),'Type','text'));
                 h = text(pt(1),pt(2),num2str(n) ...
                     ,'Color','r','FontWeight','bold'); %Number of Points
                 hold off
@@ -101,11 +102,15 @@ switch action
                 Matrix(n,n) = 0;
                 setappdata(gcf,'Matrix',Matrix)
                 Matrix
+                Resistance = getappdata(gcf,'Resistance');
+                if sum(sum(Matrix))<1
+                    a=1;
+                else
+                    a=sum(sum(Matrix));
+                end
+                Resistance(1,a) = 0;
+                setappdata(gcf,'Resistance',Resistance)
                 
-                dMatrix = getappdata(gcf,'dMatrix');
-                dMatrix(n,n) = 0;
-                setappdata(gcf,'dMatrix',dMatrix)
-                dMatrix
             case 'alt' %rechte Maustaste
                 switch get(gco,'Type')
                     case 'text' %deleting Point
@@ -133,15 +138,6 @@ switch action
                              Matrix(n,:) = [];
                              Matrix(:,n) = [];
                              setappdata(gcf,'Matrix',Matrix)
-                             Matrix
-                        end
-                        
-                        if isappdata(gcf,'dMatrix')
-                             dMatrix = getappdata(gcf,'dMatrix');
-                             dMatrix(n,:) = [];
-                             dMatrix(:,n) = [];
-                             setappdata(gcf,'dMatrix',dMatrix)
-                             dMatrix
                         end
                         
                         
@@ -166,13 +162,6 @@ switch action
                             setappdata(gcf,'Matrix',Matrix)
                             Matrix
                         end
-                        
-                        if isappdata(gcf,'dMatrix')
-                            dMatrix = getappdata(gcf,'dMatrix');
-                            dMatrix(I,J) = dMatrix(I,J)-S;
-                            setappdata(gcf,'dMatrix',dMatrix)
-                            dMatrix
-                        end
                         delete(gco)
                 end % End object switch
         end % End button switch
@@ -190,7 +179,21 @@ switch action
                 end
                 set(gcf,'WindowButtonMotionFcn', '');
             case ENTER %later for the command to calculate
-                 set(gcf,'WindowButtonMotionFcn', ''); 
+                
+                    Matrix = getappdata(gcf,'Matrix');
+                    Resistance = getappdata(gcf,'Resistance');
+                    Ic = adjacency2incidence(Matrix);
+                    icc=full(Ic)
+                    [m,n] = size(icc)
+                    app(n)
+                    uiwait(gcf)
+%                     voltin                      
+%                     U=-Matrix*voltin
+                    Matrix
+                    
+                                 
+                
+                set(gcf,'WindowButtonMotionFcn', ''); 
         end
         
     case 'init'             %called when function is started

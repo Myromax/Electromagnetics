@@ -28,7 +28,6 @@ s = [ones(n,1); -ones(n,1)];
 is = [(1:n)'; (1:n)'];
 js = [i(:); j(:)];
 Ic = sparse(is,js,s,n,nverts);
-Ic = Ic';
 
 % fix self-linking problem (0)
 a = find(i==j);
