@@ -95,7 +95,7 @@ switch action
                         Matrix(J,I) = Matrix(J,I)+X; %adding the values in the spots where the connections are made
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
                         
-                        Matrix
+                        A=Matrix
                         
                     else
                         delete(line_h) % if the end of the line is not on a number delete it
@@ -191,15 +191,26 @@ switch action
     case 'init'             %called when function is started
         fig = figure('BackingStore', 'on', 'IntegerHandle', 'off', 'Name', 'Adjacency Matrix' ...
             ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on');
-        
+        movegui(fig,'west');
+        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@putinval);
+         
+       
+            
+            
         ax = axes;
         title('Double click to create vertex. Single click to connect. Right click to delete')
         xlim([0 10]);
         ylim([0 10]);
         set(fig,'WindowButtonDownFcn', 'adj_matrix_gui(''down'')');
         set(fig,'KeyPressFcn','adj_matrix_gui(''keypress'')')
+        %input fenster hier öfffnen lassen
     otherwise
         error(['Unknown - ' action])
+        
+        uiwait(gcf)
+        app(2,3)
+        app.components
+     
 end % End action switch
 
 function stack_text_on_top
@@ -208,4 +219,16 @@ handles = get(gca,'Children');
 txt_h = findobj(handles,'Type','text');
 
 set(gca,'Children',[txt_h; setdiff(handles,txt_h)])
+
+ function putinval(varargin)
+            [N1,N2]=size(Matrix)
+            M=size(line_h)
+            app(N1,M)
+            uiwait(gcf);
+            components
+            
+            
+            
+            
+
 
