@@ -6,8 +6,7 @@ function adj_matrix_gui(action)
 if nargin == 0
     action = 'init'; %when programm is started case 'init' is called
 end
- X=zeros(1);
- S=zeros(1);
+
  h = gco;    %handle of current object, last number on the screen
  
 switch action
@@ -55,47 +54,12 @@ switch action
                         I = round(str2double(get(startobj,'String'))); %getting string of start object and transfer to double
                         J = round(str2double(get(endobj,'String'))); %getting string of end object and transfer to double
                         Matrix = getappdata(gcf,'Matrix'); %transform matrix of current function
-                        
-                        ESC = 27;
-                        R = 114;
-                        L = 108;
-                        C = 99;
-                      
-                        switch get(gcf,'CurrentCharacter')
-                            
-                            case R
-                                d = inputdlg('Enter value of resistance');
-                                X = str2double(d);
-                                c=[1,0,0];
-                                l=2;
-                                
-                                
-                            case L 
-                                d = inputdlg('Enter value of capacitance');
-                                X = str2double(d); 
-                                c=[0,1,0];
-                                l=1;
-                                
-                            case C
-                                d = inputdlg('Enter value of inductance');
-                                X = str2double(d);
-                                c=[1,1,0];
-                                l=1.5;
-                                
-                            otherwise X=1; c=[0,0,1]; l=0.5;
-                                        
-                        end
-                      
-                        a=findobj(gcf,'Type','line','UserData','');
-                        set(a,'UserData',X,'Color',c,'LineWidth',l)
-                       
-                        
                        
                         Matrix(I,J) = Matrix(I,J)+X; %adding the values in the spots where the connections are made
                         Matrix(J,I) = Matrix(J,I)+X; %adding the values in the spots where the connections are made
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
                         
-                        A=Matrix
+                        Matrix
                         
                     else
                         delete(line_h) % if the end of the line is not on a number delete it
@@ -193,10 +157,7 @@ switch action
             ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on');
         movegui(fig,'west');
         pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@putinval);
-         
-       
-            
-            
+          
         ax = axes;
         title('Double click to create vertex. Single click to connect. Right click to delete')
         xlim([0 10]);
@@ -220,13 +181,107 @@ txt_h = findobj(handles,'Type','text');
 
 set(gca,'Children',[txt_h; setdiff(handles,txt_h)])
 
- function putinval(varargin)
-            [N1,N2]=size(Matrix)
-            M=size(line_h)
-            app(N1,M)
-            uiwait(gcf);
-            components
+end
+
+    function putinval(varargin)
             
+     %opening new input value
+           f=figure('Name','Input values','NumberTitle', 'off');
+           movegui(f,'east')      
+     %getting number of nodes and vertices
+     txt1=uicontrol(f,'Style','text','Position',[10 350 110 50],'String','Number of Nodes');
+     edt1=uicontrol(f,'Style','edit','Position',[120 380 65 25]);
+     txt2=uicontrol(f,'Style','text','Position',[10 300 110 50],'String','Number of Vertices');
+     edt2=uicontrol(f,'Style','edit','Position',[120 330 65 25]);
+     
+     pushb1=uicontrol(f,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
+     
+    
+     %callback for input values
+ function generate(varargin)
+         
+    
+          N=str2num(get(edt1,'string'));
+          M=str2num(get(edt2,'string'));
+                 
+       
+       
+        
+        %opening edit boxes for nodes and vertices
+        for i= 1 : N
+        txt(i)=uicontrol('Style','text','Position',[20 250-((i*50)-50) 50 50],'String','Node');
+        edit1(i)=uicontrol(f,'Style','edit','Position',[70 280-((i*50)-50) 65 25]);
+        text=uicontrol('Style','text','position',[10 285-((i*50)-50) 10 15],'string',i);
+        end
+        
+        for j= 1 : M
+        txt=uicontrol('Style','text','Position',[140 250-((j*50)-50) 50 50],'String','vertices');  
+        edit2(j)=uicontrol(f,'Style','edit','Position',[200 280-((j*50)-50) 65 25]);
+        chkb1(j)=uicontrol('Style','radiobutton','Position',[270 290-((j*50)-50) 70 15],'String', 'Resistor');
+        valres(j)=uicontrol('Style','edit','position',[335 290-((j*50)-50) 70 15]);
+        chkb2(j)=uicontrol('Style','radiobutton','Position',[270 275-((j*50)-50) 70 15],'String', 'Ground');
+        
+        end
+        
+     pushb2=uicontrol(f,'Style','pushbutton','string','Finish','position',[450 27 70 20],'callback',@finish);   
+      
+        
+     function [Pot,CurrentsN,V]=finish(varargin)
+         
+         CurrentsN=zeros(N,1);
+           %getting current at certain nodes (no input=0)
+           for i=1:N     
+                           
+            if isempty(get(edit1(i),'string'))
+            else
+            CurrentsN(i,1)=str2num(get(edit1(i),'string'));
+            end
+            
+           end
+           
+           
+        Pot=sym('q',[M,1]);
+        %getting grounded potential rest becomes q
+        for k=1:M           
+                           
+            if isempty(get(edit2(k),'string'))&&(get(chkb2(k),'value')==1)
+            Pot(k)=0;
+            else
+            
+            end
+           
+        end
+       
+        V=zeros(M,1);
+        %getting Resistor values at the vertices
+        for k=1:M
+            if isempty(get(valres(k),'string'))&&(get(chkb2(k),'value')==0)
+            else
+            V(k,1)=num2str(get(valres(k),'string'));
+            
+            end
+        end
+        
+     end
+ end
+    end
+end
+
+
+
+        
+         
+       
+ 
+         
+         
+         
+
+
+     
+            
+            
+          
             
             
             
