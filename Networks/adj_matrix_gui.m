@@ -6,8 +6,11 @@ function adj_matrix_gui(action)
 if nargin == 0
     action = 'init'; %when programm is started case 'init' is called
 end
+ global Matrix
  X=zeros(1);
  S=zeros(1);
+ h = gco;    %handle of current object, last number on the screen
+ 
 switch action
     case 'motion'     %case 'motion' called when drawing line between numbers
         line_h = getappdata(gcf,'motionline'); %defining drawn line as line_h
@@ -23,13 +26,13 @@ switch action
         button = get(gcf,'SelectionType');
         switch button
             case 'normal'
-                h = gco;    %handle of current object, last number on the screen
+                
                 fig = gcf;  %handle of current figure, plot window
                 
                 % First click
                 if ~isappdata(fig, 'motionline') %check if current figure has value'motionline' and if 'motionline' is associated with fig
-                    if isequal(get(h,'Type'),'text') %checks if type of the numbers in the plot is text
-                        pt = get(h,'Position'); %position of last number on the screen
+                    if isequal(get(h,'Type'),'text') %checks if type of the current object in the plot is text
+                        pt = get(h,'Position'); %position of current object on the screen
                         hold on
                         line_h = plot(pt(1), pt(2),'b-.' ... %plotting the points on the screen
                             ,'EraseMode','normal');
@@ -53,67 +56,38 @@ switch action
                         I = round(str2double(get(startobj,'String'))); %getting string of start object and transfer to double
                         J = round(str2double(get(endobj,'String'))); %getting string of end object and transfer to double
                         Matrix = getappdata(gcf,'Matrix'); %transform matrix of current function
-                        
-                        ESC = 27;
-                        set(fig,'WindowButtonMotionFcn', '');
-%                           ui = Comp                  
-%                           uiwait;
-%                           ui.I;
-%                           valueR=ui.R;
-%                           ui.C;
-%                           delete(ui)
-                        
-                        Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made (start to end)
-                        Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made (end to start)
+                       
+                        Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made
+                        Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
-
                         
-                        Ic = adjacency2incidence(Matrix);
-                        icc=full(Ic)
-                        length(icc)
-                        [m,n] = size(icc)
-%                         Resistance = getappdata(gcf,'Resistance');
-%                         Resistance(m,m) = valueR;
-%                         Resistance
-%                         setappdata(gcf,'Resistance',Resistance)
+                        Matrix
                         
                     else
                         delete(line_h) % if the end of the line is not on a number delete it
                     end
                     
                     rmappdata(gcf,'motionline') %removing the motion line
-%                     set(fig,'WindowButtonMotionFcn', '');%setting reaction back to move the cursor
+                    set(fig,'WindowButtonMotionFcn', '');%setting reaction back to move the cursor
                 end
-            case 'open' %creating Point (doubleclick)
-                pt = get(gca,'CurrentPoint'); %Position of Cursor for Point
+            case 'open'
+                pt = get(gca,'CurrentPoint');
                 pt = pt(1,:);
                 hold on
                 n = 1+length(findobj(get(gca,'Children'),'Type','text'));
                 h = text(pt(1),pt(2),num2str(n) ...
-                    ,'Color','r','FontWeight','bold'); %Number of Points
+                    ,'Color','r','FontWeight','bold');
                 hold off
                 if ~isappdata(gcf,'Matrix')
                     setappdata(gcf,'Matrix',[])
-                end
-                if ~isappdata(gcf,'dMatrix')
-                    setappdata(gcf,'dMatrix',[])
                 end
                 Matrix = getappdata(gcf,'Matrix');
                 Matrix(n,n) = 0;
                 setappdata(gcf,'Matrix',Matrix)
                 Matrix
-                Resistance = getappdata(gcf,'Resistance');
-                if sum(sum(Matrix))<1
-                    a=1;
-                else
-                    a=sum(sum(Matrix));
-                end
-                Resistance(1,a) = 0;
-                setappdata(gcf,'Resistance',Resistance)
-                
-            case 'alt' %rechte Maustaste
+            case 'alt'
                 switch get(gco,'Type')
-                    case 'text' %deleting Point
+                    case 'text'
                         n = round(str2double(get(gco,'String')));
                         pt = get(gco,'Position');
                         handles = get(gca,'Children');
@@ -134,15 +108,14 @@ switch action
                             end
                         end
                         if isappdata(gcf,'Matrix')
-                             Matrix = getappdata(gcf,'Matrix');
-                             Matrix(n,:) = [];
-                             Matrix(:,n) = [];
-                             setappdata(gcf,'Matrix',Matrix)
+                            Matrix = getappdata(gcf,'Matrix');
+                            Matrix(n,:) = [];
+                            Matrix(:,n) = [];
+                            setappdata(gcf,'Matrix',Matrix)
+                            Matrix
                         end
-                        
-                        
                         delete(gco)
-                    case 'line' %deleting line
+                    case 'line'
                         xdata = get(gco,'XData'); %getting x coordinates of beginning and end of the line
                         ydata = get(gco,'YData'); %getting y coordinates of beginning and end of the line
                         txt_h = findobj(get(gca,'Children'),'Type','text'); %graphics placeholder array
@@ -157,6 +130,8 @@ switch action
                         end
                         if isappdata(gcf,'Matrix')
                             Matrix = getappdata(gcf,'Matrix');
+                            h=gco;
+                            S=get(h,'UserData');
                             Matrix(I,J) = Matrix(I,J)-S;
                             Matrix(J,I) = Matrix(J,I)-S;
                             setappdata(gcf,'Matrix',Matrix)
@@ -167,7 +142,6 @@ switch action
         end % End button switch
     case 'keypress'
         ESC = 27;
-        ENTER = 13;
         
         switch get(gcf,'CurrentCharacter')
             case ESC
@@ -178,36 +152,29 @@ switch action
                     rmappdata(gcf,'motionline')
                 end
                 set(gcf,'WindowButtonMotionFcn', '');
-            case ENTER %later for the command to calculate
-                
-                    Matrix = getappdata(gcf,'Matrix');
-                    Resistance = getappdata(gcf,'Resistance');
-                    Ic = adjacency2incidence(Matrix);
-                    icc=full(Ic)
-                    [m,n] = size(icc)
-                    app(n)
-                    uiwait(gcf)
-%                     voltin                      
-%                     U=-Matrix*voltin
-                    Matrix
-                    
-                                 
-                
-                set(gcf,'WindowButtonMotionFcn', ''); 
         end
         
     case 'init'             %called when function is started
         fig = figure('BackingStore', 'on', 'IntegerHandle', 'off', 'Name', 'Adjacency Matrix' ...
             ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on');
-        
+        movegui(fig,'west');
+        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@putinval);
+          
         ax = axes;
         title('Double click to create vertex. Single click to connect. Right click to delete')
         xlim([0 10]);
         ylim([0 10]);
         set(fig,'WindowButtonDownFcn', 'adj_matrix_gui(''down'')');
         set(fig,'KeyPressFcn','adj_matrix_gui(''keypress'')')
+        
+        %input fenster hier öfffnen lassen
     otherwise
         error(['Unknown - ' action])
+        
+        uiwait(gcf)
+        app(2,3)
+        app.components
+     
 end % End action switch
 
 function stack_text_on_top
@@ -216,6 +183,107 @@ handles = get(gca,'Children');
 txt_h = findobj(handles,'Type','text');
 
 set(gca,'Children',[txt_h; setdiff(handles,txt_h)])
-end
+
 end
 
+    function putinval(varargin)
+            
+     %opening new input value
+           f=figure('Name','Input values','NumberTitle', 'off');
+           movegui(f,'east')      
+     %getting number of nodes and vertices
+     txt1=uicontrol(f,'Style','text','Position',[10 350 110 50],'String','Number of Nodes');
+     edt1=uicontrol(f,'Style','edit','Position',[120 380 65 25]);
+     txt2=uicontrol(f,'Style','text','Position',[10 300 110 50],'String','Number of Vertices');
+     edt2=uicontrol(f,'Style','edit','Position',[120 330 65 25]);
+     
+     pushb1=uicontrol(f,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
+     
+    
+     %callback for input values
+ function generate(varargin)
+         
+    
+          N=str2num(get(edt1,'string')); %number of nodes
+          M=str2num(get(edt2,'string')); %number of edges
+                 
+       
+       
+        
+        %opening edit boxes for nodes and vertices
+        for i= 1 : N
+        txt(i)=uicontrol('Style','text','Position',[20 250-((i*50)-50) 50 50],'String','Node');
+        edit1(i)=uicontrol(f,'Style','edit','Position',[70 280-((i*50)-50) 65 25]);
+        text=uicontrol('Style','text','position',[10 285-((i*50)-50) 10 15],'string',i);
+%         edit2(i)=uicontrol(f,'Style','edit','Position',[260 280-((i*50)-50) 65 25]);
+        chkb2(i)=uicontrol('Style','radiobutton','Position',[140 275-((i*50)-50) 70 35],'String', 'Ground');
+        end
+        
+        for j= 1 : M
+        text=uicontrol('Style','text','position',[265 285-((j*50)-50) 10 15],'string',j);
+        txt=uicontrol('Style','text','Position',[275 250-((j*50)-50) 50 50],'String','Vertice');
+        chkb1(j)=uicontrol('Style','radiobutton','Position',[330 283-((j*50)-50) 70 20],'String', 'Resistor');
+        valres(j)=uicontrol('Style','edit','position',[395 285-((j*50)-50) 70 15]);
+        
+        end
+        
+     pushb2=uicontrol(f,'Style','pushbutton','string','Finish','position',[450 27 70 20],'callback',@finish);   
+      
+        
+     function [Pot,CurrentsN,V]=finish(varargin)
+         
+         CurrentsN=zeros(N,1);
+           %getting current at certain nodes (no input=0)
+           for i=1:N     
+                           
+            if isempty(get(edit1(i),'string'))
+            else
+            CurrentsN(i,1)=str2num(get(edit1(i),'string'));
+            end
+            
+           end
+           
+           
+        Pot=sym('q',[N,1]);
+        %getting grounded potential rest becomes q
+        for k=1:N           
+                           
+            if get(chkb2(k),'value')==1
+            Pot(k)=0;
+            else
+            
+            end
+           
+        end
+       
+        RMatrix=zeros(1,M);
+        %getting Resistor values at the vertices
+        for u=1:M
+            if get(chkb1(u),'value')==1
+            V(u)=str2num(get(valres(u),'string'));
+            end
+        end
+        RMatrix=diag(V);
+        
+        Pot;
+        RMatrix
+        CurrentsN;
+        AMatrix = Matrix
+        IMatrix = full(adjacency2incidence(AMatrix))
+        
+        
+        SMatrix = IMatrix'*inv(RMatrix)*IMatrix;
+        k = find(Pot);
+        Pot1 = SMatrix(k,k)*Pot(k);
+        CurrentsN = CurrentsN(k);
+        [A,B] = equationsToMatrix(Pot1, Pot(k));
+        X = linsolve(A,CurrentsN);
+        Pot(k)=X;
+        Pot
+        U = IMatrix*Pot
+        I = inv(RMatrix)*U
+        
+     end
+ end
+    end
+end
