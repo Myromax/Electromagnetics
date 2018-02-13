@@ -160,14 +160,16 @@ switch action
         
     case 'init'             %called when function is started
         fig = figure('BackingStore', 'on', 'IntegerHandle', 'off', 'Name', 'Adjacency Matrix' ...
-            ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on');
+            ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on','units','normalized','outerposition',[0 0 1 1]);
         movegui(fig,'west');
-        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
+        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[835 90 70 20],'callback',@generate);
           
-        ax = axes;
+        ax = axes('Position',[0.1 0.1 0.35 0.9]);
+        axis(ax,'square')
+        ax.ActivePositionProperty = 'position';
         title('Double click to create vertex. Single click to connect. Right click to delete')
-        xlim([0 10]);
-        ylim([0 10]);
+        xlim([0 8]);
+        ylim([0 8]);
         set(fig,'WindowButtonDownFcn', 'adj_matrix_gui(''down'')');
         set(fig,'KeyPressFcn','adj_matrix_gui(''keypress'')')
         
@@ -175,9 +177,6 @@ switch action
     otherwise
         error(['Unknown - ' action])
         
-        uiwait(gcf)
-        app(2,3)
-        app.components
      
 end % End action switch
 
@@ -208,8 +207,8 @@ end
      %callback for input values
  function generate(varargin)
      
-          f=figure('Name','Input values','NumberTitle', 'off');
-           movegui(f,'east')
+%            f=figure('Name','Input values','NumberTitle', 'off');
+%             movegui(f,'east')
          
           Matrix=getappdata(0,'Matrix');
           [N,t]= size(Matrix); %number of nodes
@@ -220,22 +219,27 @@ end
         
         %opening edit boxes for nodes and vertices
         for i= 1 : N
-        txt(i)=uicontrol('Style','text','Position',[20 250-((i*50)-50) 50 50],'String','Node');
-        edit1(i)=uicontrol(f,'Style','edit','Position',[70 280-((i*50)-50) 65 25]);
-        text=uicontrol('Style','text','position',[10 285-((i*50)-50) 10 15],'string',i);
+        text=uicontrol('Style','text','position',[650 730-((i*50)-50) 10 15],'string',i); %-190
+        txt(i)=uicontrol('Style','text','Position',[660 695-((i*50)-50) 50 50],'String','Node'); %20
+        
 %         edit2(i)=uicontrol(f,'Style','edit','Position',[260 280-((i*50)-50) 65 25]);
-        chkb2(i)=uicontrol('Style','radiobutton','Position',[140 275-((i*50)-50) 70 35],'String', 'Ground');
+        chkb2(i)=uicontrol('Style','radiobutton','Position',[780 720-((i*50)-50) 70 35],'String', 'Ground');%140
+        edit1(i)=uicontrol('Style','edit','Position',[710 725-((i*50)-50) 65 25]); %70
         end
         
         for j= 1 : M
-        text=uicontrol('Style','text','position',[265 285-((j*50)-50) 10 15],'string',j);
-        txt=uicontrol('Style','text','Position',[275 250-((j*50)-50) 50 50],'String','Vertice');
-        chkb1(j)=uicontrol('Style','radiobutton','Position',[330 283-((j*50)-50) 70 20],'String', 'Resistor');
-        valres(j)=uicontrol('Style','edit','position',[395 285-((j*50)-50) 70 15]);
+        text=uicontrol('Style','text','position',[950 730-((j*50)-50) 10 15],'string',j); %265 -145
+        txt=uicontrol('Style','text','Position',[960 695-((j*50)-50) 50 50],'String','Vertice'); %275
+        chkb1(j)=uicontrol('Style','radiobutton','Position',[1015 728-((j*50)-50) 70 20],'String', 'Resistor'); %330
+        valres(j)=uicontrol('Style','edit','position',[1080 725-((j*50)-50) 65 25]); %395
         
         end
         
-     pushb2=uicontrol(f,'Style','pushbutton','string','Finish','position',[450 27 70 20],'callback',@finish);   
+        if j>i
+            pushb2=uicontrol('Style','pushbutton','string','Finish','position',[835 680-((j*50)-50) 70 20],'callback',@finish);
+        else
+            pushb2=uicontrol('Style','pushbutton','string','Finish','position',[835 680-((i*50)-50) 70 20],'callback',@finish);
+        end
       
         
      function [Pot,CurrentsN,V]=finish(varargin)
@@ -287,9 +291,26 @@ end
         [A,B] = equationsToMatrix(Pot1, Pot(k));
         X = linsolve(A,CurrentsN);
         Pot(k)=X;
-        Pot
+        
+        textpotential=uicontrol('Style','text','position',[850 760 45 15],'string','Potential'); %-190
+
+        for i= 1 : N
+            Potential =char(Pot(i))
+        textpot=uicontrol('Style','text','position',[870 730-((i*50)-50) 10 15],'string',Potential); %-190
+        end
+        
         U = IMatrix*Pot
         I = inv(RMatrix)*U
+        
+        textVoltage=uicontrol('Style','text','position',[1160 760 45 15],'string','Voltage');
+        textCurrent=uicontrol('Style','text','position',[1230 760 45 15],'string','Current');
+        
+        for i= 1 : M
+            Voltage =char(U(i));
+            Current =char(I(i));
+        textVoltage=uicontrol('Style','text','position',[1180 730-((i*50)-50) 10 15],'string',Voltage);
+        textCurrent=uicontrol('Style','text','position',[1250 730-((i*50)-50) 10 15],'string',Current);
+        end
         
      end
  end
