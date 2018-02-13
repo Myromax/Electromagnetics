@@ -162,7 +162,7 @@ switch action
         fig = figure('BackingStore', 'on', 'IntegerHandle', 'off', 'Name', 'Adjacency Matrix' ...
             ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on','units','normalized','outerposition',[0 0 1 1]);
         movegui(fig,'west');
-        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[835 90 70 20],'callback',@generate);
+        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[630 215 70 20],'callback',@generate);
           
         ax = axes('Position',[0.1 0.1 0.35 0.9]);
         axis(ax,'square')
@@ -296,7 +296,7 @@ end
 
         for i= 1 : N
             Potential =char(Pot(i))
-        textpot=uicontrol('Style','text','position',[870 730-((i*50)-50) 10 15],'string',Potential); %-190
+        textpot=uicontrol('Style','text','position',[855 730-((i*50)-50) 40 15],'string',Potential); %-190
         end
         
         U = IMatrix*Pot
@@ -308,11 +308,10 @@ end
         for i= 1 : M
             Voltage =char(U(i));
             Current =char(I(i));
-        textVoltage=uicontrol('Style','text','position',[1180 730-((i*50)-50) 10 15],'string',Voltage);
-        textCurrent=uicontrol('Style','text','position',[1250 730-((i*50)-50) 10 15],'string',Current);
+        textVoltage=uicontrol('Style','text','position',[1163 730-((i*50)-50) 40 15],'string',Voltage);
+        textCurrent=uicontrol('Style','text','position',[1235 730-((i*50)-50) 40 15],'string',Current);
         end
         
      end
  end
-    end
-% end
+end
