@@ -6,7 +6,6 @@ function adj_matrix_gui(action)
 if nargin == 0
     action = 'init'; %when programm is started case 'init' is called
 end
- global Matrix
  X=zeros(1);
  S=zeros(1);
  h = gco;    %handle of current object, last number on the screen
@@ -60,6 +59,7 @@ switch action
                         Matrix(I,J) = Matrix(I,J)+1; %adding the values in the spots where the connections are made
                         Matrix(J,I) = Matrix(J,I)+1; %adding the values in the spots where the connections are made
                         setappdata(gcf,'Matrix',Matrix) %setting the new  Transform Matrix into the 'Matrix' of the function
+                        setappdata(0,'Matrix',Matrix)
                         
                         Matrix
                         
@@ -80,10 +80,12 @@ switch action
                 hold off
                 if ~isappdata(gcf,'Matrix')
                     setappdata(gcf,'Matrix',[])
+                    setappdata(0,'Matrix',[])
                 end
                 Matrix = getappdata(gcf,'Matrix');
                 Matrix(n,n) = 0;
                 setappdata(gcf,'Matrix',Matrix)
+                setappdata(0,'Matrix',Matrix)
                 Matrix
             case 'alt'
                 switch get(gco,'Type')
@@ -112,6 +114,7 @@ switch action
                             Matrix(n,:) = [];
                             Matrix(:,n) = [];
                             setappdata(gcf,'Matrix',Matrix)
+                            setappdata(0,'Matrix',Matrix)
                             Matrix
                         end
                         delete(gco)
@@ -135,6 +138,7 @@ switch action
                             Matrix(I,J) = Matrix(I,J)-S;
                             Matrix(J,I) = Matrix(J,I)-S;
                             setappdata(gcf,'Matrix',Matrix)
+                            setappdata(0,'Matrix',Matrix)
                             Matrix
                         end
                         delete(gco)
@@ -158,7 +162,7 @@ switch action
         fig = figure('BackingStore', 'on', 'IntegerHandle', 'off', 'Name', 'Adjacency Matrix' ...
             ,'NumberTitle', 'off', 'MenuBar', 'none', 'DoubleBuffer','on');
         movegui(fig,'west');
-        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@putinval);
+        pushb=uicontrol(fig,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
           
         ax = axes;
         title('Double click to create vertex. Single click to connect. Right click to delete')
@@ -186,26 +190,30 @@ set(gca,'Children',[txt_h; setdiff(handles,txt_h)])
 
 end
 
-    function putinval(varargin)
-            
-     %opening new input value
-           f=figure('Name','Input values','NumberTitle', 'off');
-           movegui(f,'east')      
-     %getting number of nodes and vertices
-     txt1=uicontrol(f,'Style','text','Position',[10 350 110 50],'String','Number of Nodes');
-     edt1=uicontrol(f,'Style','edit','Position',[120 380 65 25]);
-     txt2=uicontrol(f,'Style','text','Position',[10 300 110 50],'String','Number of Vertices');
-     edt2=uicontrol(f,'Style','edit','Position',[120 330 65 25]);
-     
-     pushb1=uicontrol(f,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
+%     function putinval(varargin)
+%             
+%      %opening new input value
+%            f=figure('Name','Input values','NumberTitle', 'off');
+%            movegui(f,'east') 
+%            Matrix=getappdata(0,'Matrix')
+%      %getting number of nodes and vertices
+%      txt1=uicontrol(f,'Style','text','Position',[10 350 110 50],'String','Number of Nodes');
+%      edt1=uicontrol(f,'Style','edit','Position',[120 380 65 25]);
+%      txt2=uicontrol(f,'Style','text','Position',[10 300 110 50],'String','Number of Vertices');
+%      edt2=uicontrol(f,'Style','edit','Position',[120 330 65 25]);
+%      
+%      pushb1=uicontrol(f,'Style','pushbutton','string','Continue','position',[450 7 70 20],'callback',@generate);
      
     
      %callback for input values
  function generate(varargin)
+     
+          f=figure('Name','Input values','NumberTitle', 'off');
+           movegui(f,'east')
          
-    
-          N=str2num(get(edt1,'string')); %number of nodes
-          M=str2num(get(edt2,'string')); %number of edges
+          Matrix=getappdata(0,'Matrix');
+          [N,t]= size(Matrix); %number of nodes
+          [M,t] = size(full(adjacency2incidence(Matrix))); %number of edges
                  
        
        
@@ -286,4 +294,4 @@ end
      end
  end
     end
-end
+% end
